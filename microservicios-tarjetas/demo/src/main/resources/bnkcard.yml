@@ -1,0 +1,188 @@
+openapi: 3.0.0
+info:
+  title: Credit Card Service API
+  version: 1.0.0
+  description: API for managing credit cards.
+servers:
+  - url: http://localhost:8080
+    description: Credit Card Service
+
+paths:
+
+  /credit-cards:
+    post:
+      summary: Assign a new credit card to a client (Create it).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreditCardCreateInput'
+      responses:
+        '201':
+          description: Credit card created successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreditCardDetails'
+        '400':
+          description: Bad request. Invalid input data.
+        '500':
+          description: Internal server error.
+
+  /credit-cards/{cardNumber}/balance:
+    get:
+      summary: Check the balance and available credit limit of the card.
+      parameters:
+        - name: cardNumber
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Credit card number.
+      responses:
+        '200':
+          description: Balance retrieved successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreditCardBalance'
+        '404':
+          description: Credit card not found.
+        '500':
+          description: Internal server error.
+
+  /credit-cards/{cardNumber}/purchase:
+    post:
+      summary: Register a purchase on the credit card.
+      parameters:
+        - name: cardNumber
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Credit card number.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreditCardPurchase'
+      responses:
+        '200':
+          description: Purchase registered successfully.
+        '400':
+          description: Insufficient credit or invalid amount.
+        '404':
+          description: Credit card not found.
+        '500':
+          description: Internal server error.
+
+  /credit-cards/{cardNumber}/payment:
+    post:
+      summary: Make a payment towards the credit card balance.
+      parameters:
+        - name: cardNumber
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Credit card number.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreditCardPayment'
+      responses:
+        '200':
+          description: Payment made successfully.
+        '400':
+          description: Invalid payment amount.
+        '404':
+          description: Credit card not found.
+        '500':
+          description: Internal server error.
+
+  /credit-cards/by-client/{clientId}:
+    get:
+      summary: Retrieve credit cards by client ID.
+      parameters:
+        - name: clientId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Client's ID.
+      responses:
+        '200':
+          description: Credit cards retrieved successfully.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CreditCardDetails'
+        '404':
+          description: No credit cards found for the provided client ID.
+        '500':
+          description: Internal server error.
+
+components:
+  schemas:
+    CreditCardCreateInput:
+      type: object
+      properties:
+        clientId:
+          type: string
+          description: ID of the client associated with the credit card.
+        limit:
+          type: number
+          description: Credit limit of the card.
+        cardNumber:
+          type: string
+          description: Credit card number.
+      required:
+        - clientId
+        - limit
+
+    CreditCardDetails:
+      type: object
+      properties:
+        id:
+          type: string
+        clientId:
+          type: string
+        limit:
+          type: number
+        cardNumber:
+          type: string
+        balance:
+          type: number
+        availableCredit:
+          type: number
+
+    CreditCardBalance:
+      type: object
+      properties:
+        availableCredit:
+          type: number
+        balance:
+          type: number
+
+    CreditCardPurchase:
+      type: object
+      properties:
+        amount:
+          type: number
+          description: Amount of the purchase.
+        description:
+          type: string
+          description: Description or reason for the purchase.
+
+    CreditCardPayment:
+      type: object
+      properties:
+        amount:
+          type: number
+          description: Amount to be paid towards the credit card balance.
