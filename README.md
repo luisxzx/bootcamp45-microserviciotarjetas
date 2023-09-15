@@ -1,0 +1,14 @@
+Reemplazar lo que contiene aplication.properties por lo siguiente para que funcione en local :
+
+
+spring.application.name=microservicios-tarjetas
+spring.config.import=configserver:http://localhost:8888
+server.port=8082
+transaction.service.url=http://localhost:8089
+eureka.client.serviceUrl.defaultZone=http://localhost:8761/eureka/
+spring.cloud.config.enabled=true
+
+
+
+
+
